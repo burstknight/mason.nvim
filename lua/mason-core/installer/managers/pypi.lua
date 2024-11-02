@@ -61,10 +61,10 @@ local function get_versioned_candidates(supported_python_versions)
         { semver.new "3.12.0", "python3.12" },
         { semver.new "3.11.0", "python3.11" },
         { semver.new "3.10.0", "python3.10" },
-        { semver.new "3.9.0", "python3.9" },
-        { semver.new "3.8.0", "python3.8" },
-        { semver.new "3.7.0", "python3.7" },
-        { semver.new "3.6.0", "python3.6" },
+        { semver.new "3.9.0",  "python3.9" },
+        { semver.new "3.8.0",  "python3.8" },
+        { semver.new "3.7.0",  "python3.7" },
+        { semver.new "3.6.0",  "python3.6" },
     })
 end
 
@@ -76,7 +76,8 @@ local function create_venv(pkg)
     local supported_python_versions = providers.pypi.get_supported_python_versions(pkg.name, pkg.version):get_or_nil()
 
     -- 1. Resolve stock python3 installation.
-    local stock_candidates = platform.is.win and { "python", "python3" } or { "python3", "python" }
+    local stock_candidates = platform.is.win and { "python", "python3", "python3.bat", "python.bat" } or
+        { "python3", "python" }
     local stock_target = resolve_python3(stock_candidates)
     if stock_target then
         log.fmt_debug("Resolved stock python3 installation version %s", stock_target.version)
@@ -109,7 +110,8 @@ local function create_venv(pkg)
     then
         if ctx.opts.force then
             ctx.stdio_sink.stderr(
-                ("Warning: The resolved python3 version %s is not compatible with the required Python versions: %s.\n"):format(
+                ("Warning: The resolved python3 version %s is not compatible with the required Python versions: %s.\n")
+                :format(
                     target.version,
                     supported_python_versions
                 )
@@ -117,7 +119,8 @@ local function create_venv(pkg)
         else
             ctx.stdio_sink.stderr "Run with :MasonInstall --force to bypass this version validation.\n"
             return Result.failure(
-                ("Failed to find a python3 installation in PATH that meets the required versions (%s). Found version: %s."):format(
+                ("Failed to find a python3 installation in PATH that meets the required versions (%s). Found version: %s.")
+                :format(
                     supported_python_versions,
                     target.version
                 )
